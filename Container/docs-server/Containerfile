@@ -1,0 +1,40 @@
+# Generic markdown documentation viewer — bakes in repo Docs/ at build time.
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
+
+USER root
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    VT_DOCS_ROOT=/docs \
+    VT_DOCS_SECTIONS=auto \
+    VT_DOCS_PORT=8080 \
+    VT_DOCS_TITLE="Document Viewer"
+
+RUN microdnf -y install python3.12 python3.12-pip && \
+    pip3.12 install uv && \
+    microdnf clean all
+
+WORKDIR /app
+
+COPY Container/docs-server/pyproject.toml /app/
+COPY Container/docs-server/docs_server /app/docs_server
+COPY Container/docs-server/templates /app/templates
+COPY Container/docs-server/static /app/static
+
+RUN uv pip install --system --no-cache .
+
+# Bake markdown from repo Docs/ — subdirs become nav sections (e.g. Dir1, Dir2).
+# Override at runtime: podman run -v /host/my-docs:/docs:ro ...
+COPY Docs/ /docs/
+
+RUN useradd -r -u 1001 -m -s /bin/bash docsviewer && \
+    chown -R docsviewer:docsviewer /app /docs
+
+USER docsviewer
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD python3.12 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health')"
+
+CMD ["python3.12", "-m", "uvicorn", "docs_server.app:app", "--host", "0.0.0.0", "--port", "8080"]

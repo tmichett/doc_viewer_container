@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.6.1/github-markdown-light.min.css" id="gh-markdown-light">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.6.1/github-markdown-dark.min.css" id="gh-markdown-dark" disabled>
+  <link rel="stylesheet" href="/static/site.css?v={{ asset_version }}">
+  <script>
+    (function () {
+      var t = localStorage.getItem("vt-docs-theme") || "auto";
+      document.documentElement.dataset.theme = t;
+      if (t === "dark") document.getElementById("gh-markdown-dark").disabled = false;
+      else if (t === "light") document.getElementById("gh-markdown-dark").disabled = true;
+      else if (window.matchMedia("(prefers-color-scheme: dark)").matches)
+        document.getElementById("gh-markdown-dark").disabled = false;
+    })();
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a class="site-logo-link" href="/" aria-label="Markdown Reader — home">
+        <img class="site-logo" src="/static/markdown-reader-logo.png" alt="Markdown Reader">
+      </a>
+      <div class="site-header-text">
+        <a class="site-title" href="/">{{ app_title }}</a>
+        <span class="site-subtitle">Markdown documentation</span>
+      </div>
+      <button type="button" id="theme-toggle" class="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <input id="nav-filter" type="search" placeholder="Filter docs…" autocomplete="off">
+      </div>
+      <nav class="nav-tree" id="nav-tree">
+        {% from "nav_tree.html" import render_nav %}
+        {{ render_nav(nav_tree) }}
+      </nav>
+    </aside>
+    <div class="sidebar-splitter" id="sidebar-splitter" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" tabindex="0"></div>
+    <main class="content">
+      <header class="page-header">
+        <h1>{{ page_title }}</h1>
+        <a class="source-link" href="{{ github_url }}" target="_blank" rel="noopener">View on GitHub</a>
+      </header>
+      <article class="markdown-body">
+        {{ body_html | safe }}
+      </article>
+    </main>
+  </div>
+  <script src="/static/site.js?v={{ asset_version }}"></script>
+</body>
+</html>

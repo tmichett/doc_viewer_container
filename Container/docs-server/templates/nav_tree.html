@@ -1,0 +1,21 @@
+{% macro render_nav(nodes) %}
+<ul>
+  {% for node in nodes %}
+    {% if node.is_dir and node.name in ["Container", "Docs"] %}
+      <li class="nav-section">
+        <span class="nav-section-name">{{ node.name }}</span>
+        {{ render_nav(node.children) }}
+      </li>
+    {% elif node.is_dir %}
+      <li class="nav-dir">
+        <span class="nav-dir-name">{{ node.name }}</span>
+        {{ render_nav(node.children) }}
+      </li>
+    {% else %}
+      <li class="nav-file{% if node.path == doc_path %} active{% endif %}">
+        <a href="/doc/{{ node.path }}">{{ node.name }}</a>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
+{% endmacro %}
